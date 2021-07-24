@@ -8,10 +8,23 @@
 
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-extras@3.3.0/dist/aframe-extras.min.js"></script>
   </head>
 
   <body>
     <a-scene environment>
+      <a-assets>
+        <a-asset-item
+          id="heron"
+          src="http://localhost:1234/croquet/scene.gltf"
+        ></a-asset-item>
+      </a-assets>
+      <a-entity
+        gltf-model="#heron"
+        animation-mixer="clip: Take 001"
+        position="1 0 -10"
+        scale="0.4 0.4 0.4"
+      ></a-entity>
     </a-scene>
 
     <script src="https://unpkg.com/@croquet/croquet@0.5.0/pub/croquet.min.js"></script>

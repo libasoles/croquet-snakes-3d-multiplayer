@@ -8,7 +8,7 @@ export default class Scene extends Croquet.Model {
   }
 
   addUser(viewId) {
-    this.userData[viewId] = Snake.create(); // { color: "orange" }
+    this.userData[viewId] = Snake.create();
     this.publish(this.sessionId, "user-added", { viewId });
   }
 
