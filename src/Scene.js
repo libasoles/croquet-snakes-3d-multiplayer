@@ -3,10 +3,10 @@ import Snake, { SnakeView } from "./Snake";
 
 const Q = Croquet.Constants;
 Q.sceneBoundaries = {
-  FORWARD: -24,
-  BACKWARD: -9,
-  LEFT: -9,
-  RIGHT: 7,
+  FORWARD: -22,
+  BACKWARD: 28,
+  LEFT: -17,
+  RIGHT: 14,
 };
 
 export default class Scene extends Croquet.Model {
@@ -52,15 +52,18 @@ export class SceneView extends Croquet.View {
   }
 
   userAdded({ viewId, modelId }) {
-    this.snakes[viewId] = new SnakeView(this.model.userData[viewId]);
-
     if (viewId === this.viewId) {
       this.keyboard = new KeyboardView(this.model, { modelId });
+      this.snakes[viewId] = new SnakeView(this.model.userData[viewId], {
+        isSelf: true,
+      });
+    } else {
+      this.snakes[viewId] = new SnakeView(this.model.userData[viewId]);
     }
   }
 
   userDeleted({ viewId }) {
-    this.snakes[viewId].detach();
+    if (this.snakes[viewId]) this.snakes[viewId].detach();
     delete this.snakes[viewId];
   }
 

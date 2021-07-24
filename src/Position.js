@@ -42,4 +42,12 @@ export class Position {
       z: pos1.z + pos2.z,
     });
   }
+
+  static multiply(pos1, delta) {
+    return new Position({
+      x: pos1.x * delta,
+      y: pos1.y * delta,
+      z: pos1.z * delta,
+    });
+  }
 }
