@@ -1,11 +1,12 @@
+import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
 
 const Q = Croquet.Constants;
 Q.sceneBoundaries = {
-  FORWARD: -12,
-  BACKWARD: 8,
-  LEFT: -10,
-  RIGHT: 8,
+  FORWARD: -24,
+  BACKWARD: -9,
+  LEFT: -9,
+  RIGHT: 7,
 };
 
 export default class Scene extends Croquet.Model {
@@ -17,13 +18,13 @@ export default class Scene extends Croquet.Model {
 
   addUser(viewId) {
     this.userData[viewId] = Snake.create({ scene: this });
-    this.publish(this.sessionId, "user-added", { viewId });
+    this.publish("scene", "user-added", { viewId });
   }
 
   deleteUser(viewId) {
     const time = this.now() - this.userData[viewId].start;
     delete this.userData[viewId];
-    this.publish(this.sessionId, "user-deleted", { viewId, time });
+    this.publish("scene", "user-deleted", { viewId, time });
   }
 
   isWithinBoundaries(position) {
@@ -41,14 +42,31 @@ export class SceneView extends Croquet.View {
     super(model);
     this.model = model;
 
-    this.subscribe(this.sessionId, "user-added", this.userAdded);
+    this.snakes = {};
 
-    document.querySelector("a-scene").addEventListener("mousedown", (e) => {
-      this.userAdded(this.viewId);
-    });
+    for (const viewId of Object.keys(model.userData))
+      this.userAdded({ viewId, modelId: model.userData[viewId].id });
+
+    this.subscribe("scene", "user-added", this.userAdded);
+    this.subscribe("scene", "user-deleted", this.userDeleted);
   }
 
-  userAdded(viewId) {
-    new SnakeView(this.model.userData[this.viewId]);
+  userAdded({ viewId, modelId }) {
+    this.snakes[viewId] = new SnakeView(this.model.userData[viewId]);
+
+    if (viewId === this.viewId) {
+      this.keyboard = new KeyboardView(this.model, { modelId });
+    }
+  }
+
+  userDeleted({ viewId }) {
+    this.snakes[viewId].detach();
+    delete this.snakes[viewId];
+  }
+
+  detach() {
+    Object.values(this.snakes).forEach((snake) => {
+      snake.detach();
+    });
   }
 }

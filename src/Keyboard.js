@@ -22,14 +22,10 @@ Q.idleKeyboard = {
   RIGHT: false,
 };
 
-export default class Keyboard extends Croquet.Model {
-  init() {}
-}
-
 export class KeyboardView extends Croquet.View {
-  constructor(model) {
-    super(model);
-    this.model = model;
+  constructor(scene, { modelId }) {
+    super(scene);
+    this.modelId = modelId;
 
     this.bindControlls();
 
@@ -52,19 +48,20 @@ export class KeyboardView extends Croquet.View {
 
     this.activeKeys[keyName] = true;
 
-    this.broadcast();
+    this.publishArrowChanged();
   }
 
   onKeyUp({ keyCode }) {
     this.activeKeys[Q.keyMap[keyCode]] = false;
 
-    this.broadcast();
+    this.publishArrowChanged();
   }
 
-  broadcast() {
+  publishArrowChanged() {
     this.publish("keyboard", "arrow-changed", {
       keys: this.activeKeys,
       viewId: this.viewId,
+      modelId: this.modelId,
     });
   }
 

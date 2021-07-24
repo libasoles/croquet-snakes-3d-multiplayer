@@ -1,13 +1,18 @@
 import { Position } from "./Position";
 
 const Q = Croquet.Constants;
-Q.speed = 0.25;
+Q.speed = 0.2;
 
 export default class Snake extends Croquet.Model {
   init({ scene }) {
     this.scene = scene;
-    this.position = new Position({ x: 0, y: -2.5, z: -5 });
-    this.cameraPosition = new Position({ x: 0, y: 3, z: 0 });
+    this.cameraPosition = new Position({ x: 0, y: 8, z: 32 });
+    this.position = new Position({
+      x: 0,
+      y: -this.cameraPosition.y + 2,
+      z: -9,
+    });
+
     this.direction = new Position();
 
     this.onTick();
@@ -16,7 +21,10 @@ export default class Snake extends Croquet.Model {
   }
 
   handleDirectionChange(event) {
-    const { keys, viewId } = event;
+    const { keys, viewId, modelId } = event;
+
+    if (this.id !== modelId) return;
+
     const direction = new Position();
 
     if (keys[Q.arrow.UP]) {
@@ -47,6 +55,7 @@ export default class Snake extends Croquet.Model {
     this.cameraPosition = Position.add(this.cameraPosition, direction);
 
     this.publish("keyboard", "position-changed", {
+      modelId: this.id,
       position: this.position,
       cameraPosition: this.cameraPosition,
     });
@@ -58,7 +67,6 @@ export class SnakeView extends Croquet.View {
     super(model);
     this.model = model;
 
-    this.lastKey = null;
     this.scene = document.querySelector("a-scene");
 
     this.createSnake();
@@ -67,24 +75,28 @@ export class SnakeView extends Croquet.View {
   }
 
   createSnake() {
-    this.camera = document.createElement("a-camera");
-    this.camera.setAttribute("position", this.model.cameraPosition);
-    this.camera.setAttribute("wasd-controls-enabled", false);
-
     this.snake = document.createElement("a-box");
     this.snake.setAttribute("color", "orange");
     this.snake.setAttribute("position", this.model.position);
+
+    this.camera = document.createElement("a-camera");
+    this.camera.setAttribute("position", this.model.cameraPosition);
+    this.camera.setAttribute("wasd-controls-enabled", false);
 
     this.camera.appendChild(this.snake);
     this.scene.appendChild(this.camera);
   }
 
-  handlePositionChanged({ position, cameraPosition }) {
+  handlePositionChanged({ modelId, position, cameraPosition: camera }) {
+    if (modelId !== this.model.id) return;
+
     this.snake.object3D.position.set(position.x, position.y, position.z);
-    this.camera.object3D.position.set(
-      cameraPosition.x,
-      cameraPosition.y,
-      cameraPosition.z
-    );
+
+    this.camera.object3D.position.set(camera.x, camera.y, camera.z);
+  }
+
+  detach() {
+    this.snake.remove();
+    this.camera.remove();
   }
 }

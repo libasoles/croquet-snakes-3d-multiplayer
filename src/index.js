@@ -1,11 +1,9 @@
-import Keyboard, { KeyboardView } from "./Keyboard";
 import Scene, { SceneView } from "./Scene";
 import Snake from "./Snake";
 
 class Game extends Croquet.Model {
   init() {
     this.scene = Scene.create();
-    this.keyboard = Keyboard.create();
   }
 }
 
@@ -14,7 +12,7 @@ class GameView extends Croquet.View {
     super(model);
     this.model = model;
 
-    this.views = [new SceneView(model.scene), new KeyboardView(model.keyboard)];
+    this.views = [new SceneView(model.scene)];
   }
 
   detach() {
@@ -27,7 +25,6 @@ class GameView extends Croquet.View {
 Game.register("Game");
 Scene.register("Scene");
 Snake.register("Snake");
-Keyboard.register("Keyboard");
 
 Croquet.Session.join({
   appId: "io.croquet.gperez.snakes3D",
