@@ -1,5 +1,5 @@
-export function isSelf(viewId, anotherViewId) {
-  return viewId === anotherViewId;
+export function isSelf(id, anotherId) {
+  return id === anotherId;
 }
 
 export function createBox({ position, color }) {

@@ -21,6 +21,8 @@ export class ToastView extends Croquet.View {
   displayStatus({ viewId, message }) {
     if (!isSelf(viewId, this.viewId)) return;
 
+    if (this.duplicates(message)) return;
+
     const toast = this.create(message);
 
     messages.appendChild(toast);
@@ -28,6 +30,12 @@ export class ToastView extends Croquet.View {
     setTimeout(() => {
       this.close(toast);
     }, 2000);
+  }
+
+  duplicates(message) {
+    return Array.from(messages.childNodes).some(
+      (child) => child.textContent === message
+    );
   }
 
   create(message) {

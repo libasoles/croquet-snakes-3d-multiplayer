@@ -1,6 +1,7 @@
 import Apple, { AppleView } from "./Apple";
 import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
+import { isSelf } from "./utils";
 
 const Q = Croquet.Constants;
 Q.sceneBoundaries = {
@@ -129,7 +130,7 @@ export class SceneView extends Croquet.View {
   }
 
   userAdded({ viewId, modelId }) {
-    if (viewId === this.viewId) {
+    if (isSelf(viewId, this.viewId)) {
       this.keyboard = new KeyboardView(this.model, { modelId });
       this.snakes[viewId] = new SnakeView(this.model.snakes[viewId], {
         isSelf: true,
