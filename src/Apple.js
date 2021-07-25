@@ -5,7 +5,7 @@ const Q = Croquet.Constants;
 
 export default class Apple extends Croquet.Model {
   init() {
-    this.size = Q.unit;
+    this.size = Q.unit * 2;
     this.position = this.initialPosition();
 
     this.color = "red";
@@ -33,7 +33,7 @@ export default class Apple extends Croquet.Model {
       Math.floor(Math.random() * Q.sceneBoundaries.BACKWARD) +
       Q.sceneBoundaries.FORWARD;
 
-    return new Position({ x, y: this.size, z });
+    return new Position({ x, y: this.size / 2, z });
   }
 }
 

@@ -31,6 +31,7 @@ Q.messages = {
     "Yum!",
     "Delicious!",
     "That was a nice one!",
+    "Lovely bite",
     "Ñam!",
     "I'd like some more!",
     "Tasty!",

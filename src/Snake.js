@@ -4,13 +4,13 @@ import { createBox, isSelf, randomFrom } from "./utils";
 const Q = Croquet.Constants;
 Q.tick = 1000 / 30;
 Q.speed = 0.5;
-Q.unit = 1;
+Q.unit = 0.5;
 
 export default class Snake extends Croquet.Model {
   init({ scene, color }) {
     this.scene = scene;
 
-    this.size = Q.unit;
+    this.size = Q.unit * 2;
     this.position = this.randomStartPosition();
     this.cameraPosition = new Position({
       ...this.position,
@@ -121,11 +121,11 @@ export default class Snake extends Croquet.Model {
     const collidesHead = Position.collides(
       this.position,
       snake.position,
-      snake.size
+      snake.size / 2
     );
 
     const collidesTail = snake.tail.some((fragment) =>
-      Position.collides(this.position, fragment, snake.size)
+      Position.collides(this.position, fragment, snake.size / 2)
     );
 
     return collidesHead || collidesTail;
@@ -163,11 +163,21 @@ export class SnakeView extends Croquet.View {
     this.create(isSelf);
 
     this.tail = [];
+    this.hydrate();
 
     this.subscribe("snake", "position-changed", this.updatePosition);
     this.subscribe("apple", "eaten", this.celebrate);
     this.subscribe("snake", "append-tail", this.appendTail);
     this.subscribe("snake", "collision", this.grumble);
+  }
+
+  hydrate() {
+    this.model.tail.forEach((fragment) => {
+      this.appendTail({
+        modelId: this.model.id,
+        position: fragment,
+      });
+    });
   }
 
   create(withCamera) {
@@ -277,6 +287,6 @@ class SnakeTailFragmentView extends Croquet.View {
   detach() {
     super.detach();
 
-    this.scene.removeChild(this.fragment);
+    if (this.fragment) this.scene.removeChild(this.fragment);
   }
 }
