@@ -158,8 +158,8 @@ export class SnakeView extends Croquet.View {
   detach() {
     super.detach();
 
-    this.snake.remove();
+    this.scene.removeChild(this.snake);
 
-    if (this.isSelf) this.camera.remove();
+    if (this.isSelf) this.scene.removeChild(this.camera);
   }
 }
