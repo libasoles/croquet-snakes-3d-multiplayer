@@ -19,7 +19,7 @@ export default class Apple extends Croquet.Model {
     return this.now() <= 1
       ? new Position({
           x: 0,
-          y: this.size,
+          y: this.size / 2,
           z: 10,
         })
       : this.randomStartPosition();

@@ -1,7 +1,7 @@
 import Apple, { AppleView } from "./Apple";
 import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
-import { isSelf } from "./utils";
+import { isSelf, randomFrom } from "./utils";
 
 const Q = Croquet.Constants;
 Q.sceneBoundaries = {
@@ -10,6 +10,20 @@ Q.sceneBoundaries = {
   LEFT: -20,
   RIGHT: 25,
 };
+
+Q.colors = [
+  "#ff9fe5",
+  "#75485e",
+  "#7192be",
+  "#70ee9c",
+  "#d4aa7d",
+  "#ef6f6c",
+  "#edae49",
+  "#087ca7",
+  "#3c5a14",
+  "#5b8c5a",
+  "orange",
+];
 
 Q.messages = {
   go: "Go!",
@@ -65,7 +79,12 @@ export default class Scene extends Croquet.Model {
   }
 
   addUser(viewId) {
-    this.snakes[viewId] = Snake.create({ scene: this });
+    const color = Q.colors[Math.floor(this.random() * Q.colors.length)];
+
+    this.snakes[viewId] = Snake.create({
+      scene: this,
+      color,
+    });
     this.publish("scene", "user-added", { viewId });
   }
 

@@ -1,13 +1,13 @@
 import { Position } from "./Position";
-import { createBox, isSelf } from "./utils";
+import { createBox, isSelf, randomFrom } from "./utils";
 
 const Q = Croquet.Constants;
 Q.tick = 1000 / 30;
 Q.speed = 0.5;
-Q.unit = 0.5;
+Q.unit = 1;
 
 export default class Snake extends Croquet.Model {
-  init({ scene }) {
+  init({ scene, color }) {
     this.scene = scene;
 
     this.size = Q.unit;
@@ -20,7 +20,7 @@ export default class Snake extends Croquet.Model {
 
     this.direction = new Position();
 
-    this.color = "orange";
+    this.color = color;
 
     this.tail = [];
 
@@ -34,7 +34,7 @@ export default class Snake extends Croquet.Model {
       Math.floor(Math.random() * (Q.sceneBoundaries.RIGHT / 3)) +
       Q.sceneBoundaries.LEFT / 3;
 
-    const position = { x: posibleX, y: this.size, z: 25 };
+    const position = { x: posibleX, y: this.size / 2, z: 25 };
 
     const wouldCollide = this.scene.collides(this.stunt(position));
     if (wouldCollide) return this.randomStartPosition();
@@ -210,10 +210,9 @@ export class SnakeView extends Croquet.View {
   celebrate({ modelId }) {
     if (!isSelf(modelId, this.model.id)) return;
 
-    const celebration = Math.floor(Math.random() * Q.messages.eat.length);
     this.publish("toast", "display", {
       viewId: this.viewId,
-      message: Q.messages.eat[celebration],
+      message: randomFrom(Q.messages.eat),
     });
   }
 
