@@ -6,13 +6,35 @@
     <title>Snakes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./styles.css" />
+
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
     <script src="https://unpkg.com/aframe-extras@3.3.0/dist/aframe-extras.min.js"></script>
   </head>
 
   <body>
-    <a-scene environment="preset: forest; skyColor: #20F; ground: hills">
+    <div id="intro">
+      <div class="hud shareTheLink">Share the link with your buddies</div>
+       
+      <div id="startButton" class="hud">
+        <span class="pressStartButton"> Start </span>
+      </div>  
+    </div>
+  
+    <div id="messages" class="hud"></div>
+ 
+    <a-scene
+      environment="preset: forest; skyColor: #20F; ground: hills"
+      vr-mode-ui="enabled: false"
+    >
       <a-assets>
         <a-asset-item
           id="flamingo"

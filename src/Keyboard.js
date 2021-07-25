@@ -25,6 +25,7 @@ Q.idleKeyboard = {
 export class KeyboardView extends Croquet.View {
   constructor(scene, { modelId }) {
     super(scene);
+    this.scene = scene;
     this.modelId = modelId;
 
     this.bindControlls();
@@ -38,6 +39,8 @@ export class KeyboardView extends Croquet.View {
   }
 
   onKeyDown({ keyCode }) {
+    if (!this.scene.isActive) return;
+
     const isControlKey = Q.controlKeys.includes(keyCode);
     if (!isControlKey) return;
 
@@ -52,6 +55,8 @@ export class KeyboardView extends Croquet.View {
   }
 
   onKeyUp({ keyCode }) {
+    if (!this.scene.isActive) return;
+
     this.activeKeys[Q.keyMap[keyCode]] = false;
 
     this.publishArrowChanged();

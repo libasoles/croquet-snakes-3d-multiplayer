@@ -10,16 +10,45 @@ Q.sceneBoundaries = {
   RIGHT: 25,
 };
 
+Q.messages = {
+  go: "Go!",
+  eat: [
+    "Yum!",
+    "Delicious!",
+    "That was a nice one!",
+    "Ñam!",
+    "I'd like some more!",
+    "Tasty!",
+    "Feels goood",
+    "Mhhh, get some more!",
+    "Oh, do I like this",
+    "❤️ I love apples ❤️",
+  ],
+  collision: "Ouch!",
+};
+
 export default class Scene extends Croquet.Model {
   init() {
     this.snakes = {};
+    this.isActive = false;
 
     this.future(1).addApple();
 
     this.subscribe(this.sessionId, "view-join", this.addUser);
     this.subscribe(this.sessionId, "view-exit", this.deleteUser);
 
+    this.subscribe(this.id, "start", this.start);
+    this.subscribe(this.id, "stop", this.stop);
+
     this.subscribe("apple", "eaten", this.appleEaten);
+  }
+
+  start() {
+    this.isActive = true;
+  }
+
+  stop() {
+    this.isActive = false;
   }
 
   appleEaten() {
@@ -72,6 +101,8 @@ export class SceneView extends Croquet.View {
     this.subscribe("scene", "user-deleted", this.userDeleted);
 
     this.subscribe("apple", "created", this.appleAdded);
+
+    startButton.onclick = () => this.start();
   }
 
   init() {
@@ -79,6 +110,16 @@ export class SceneView extends Croquet.View {
       this.userAdded({ viewId, modelId: this.model.snakes[viewId].id });
 
     this.appleAdded();
+  }
+
+  start() {
+    intro.style.display = "none";
+    this.publish("toast", "display", {
+      viewId: this.viewId,
+      message: Q.messages.go,
+    });
+
+    this.publish(this.model.id, "start");
   }
 
   appleAdded() {
@@ -111,5 +152,7 @@ export class SceneView extends Croquet.View {
     });
 
     if (this.apple) this.apple.detach();
+
+    this.publish(this.model.id, "stop");
   }
 }

@@ -144,6 +144,7 @@ export class SnakeView extends Croquet.View {
     this.tail = [];
 
     this.subscribe("snake", "position-changed", this.updatePosition);
+    this.subscribe("apple", "eaten", this.celebrate);
     this.subscribe("snake", "append-tail", this.appendTail);
   }
 
@@ -181,6 +182,14 @@ export class SnakeView extends Croquet.View {
 
     this.model.tail.forEach((pos, i) => {
       if (this.tail[i]) this.tail[i].updatePosition(pos);
+    });
+  }
+
+  celebrate() {
+    const celebration = Math.floor(Math.random() * Q.messages.eat.length);
+    this.publish("toast", "display", {
+      viewId: this.viewId,
+      message: Q.messages.eat[celebration],
     });
   }
 

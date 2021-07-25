@@ -1,3 +1,7 @@
+export function isSelf(viewId, anotherViewId) {
+  return viewId === anotherViewId;
+}
+
 export function createBox({ position, color }) {
   const Q = Croquet.Constants;
 

@@ -1,10 +1,12 @@
 import Apple from "./Apple";
 import Scene, { SceneView } from "./Scene";
 import Snake from "./Snake";
+import Toast, { ToastView } from "./Toast";
 
 class Game extends Croquet.Model {
   init() {
     this.scene = Scene.create();
+    this.toast = Toast.create();
   }
 }
 
@@ -13,7 +15,7 @@ class GameView extends Croquet.View {
     super(model);
     this.model = model;
 
-    this.views = [new SceneView(model.scene)];
+    this.views = [new SceneView(model.scene), new ToastView(model.toast)];
   }
 
   detach() {
@@ -27,6 +29,7 @@ Game.register("Game");
 Scene.register("Scene");
 Snake.register("Snake");
 Apple.register("Apple");
+Toast.register("Toast");
 
 Croquet.Session.join({
   appId: "io.croquet.gperez.snakes3D",
