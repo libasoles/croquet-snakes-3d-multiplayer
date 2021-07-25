@@ -26,7 +26,7 @@ export default class Snake extends Croquet.Model {
 
     this.onTick();
 
-    this.subscribe("keyboard", "arrow-changed", this.directionChanged);
+    this.subscribe(this.id, "arrow-changed", this.directionChanged);
   }
 
   randomStartPosition() {
@@ -42,11 +42,7 @@ export default class Snake extends Croquet.Model {
     return position;
   }
 
-  directionChanged(event) {
-    const { keys, modelId } = event;
-
-    if (this.id !== modelId) return;
-
+  directionChanged({ keys }) {
     const direction = new Position();
 
     if (keys[Q.arrow.UP]) {
@@ -82,7 +78,7 @@ export default class Snake extends Croquet.Model {
       !this.scene.encloses(nextPosition) ||
       this.scene.collides(this.stunt(nextPosition))
     ) {
-      this.publish("snake", "collision", {
+      this.publish(this.id, "collision", {
         modelId: this.id,
       });
 
@@ -99,7 +95,7 @@ export default class Snake extends Croquet.Model {
     this.tail.unshift(currentPosition);
     this.tail.pop();
 
-    this.publish("snake", "position-changed", {
+    this.publish(this.id, "position-changed", {
       modelId: this.id,
       position: nextPosition,
       cameraPosition: this.cameraPosition,
@@ -144,7 +140,7 @@ export default class Snake extends Croquet.Model {
     });
 
     this.tail.push(currentPosition);
-    this.publish("snake", "append-tail", {
+    this.publish(this.id, "append-tail", {
       modelId: this.id,
       position: currentPosition,
     });
@@ -165,10 +161,10 @@ export class SnakeView extends Croquet.View {
     this.tail = [];
     this.hydrate();
 
-    this.subscribe("snake", "position-changed", this.updatePosition);
+    this.subscribe(this.model.id, "position-changed", this.updatePosition);
+    this.subscribe(this.model.id, "append-tail", this.appendTail);
+    this.subscribe(this.model.id, "collision", this.grumble);
     this.subscribe("apple", "eaten", this.celebrate);
-    this.subscribe("snake", "append-tail", this.appendTail);
-    this.subscribe("snake", "collision", this.grumble);
   }
 
   hydrate() {
@@ -204,9 +200,7 @@ export class SnakeView extends Croquet.View {
     }
   }
 
-  updatePosition({ modelId, position, cameraPosition: camera }) {
-    if (modelId !== this.model.id) return;
-
+  updatePosition({ position, cameraPosition: camera }) {
     this.snake.object3D.position.set(position.x, position.y, position.z);
 
     if (this.isSelf)
@@ -218,7 +212,7 @@ export class SnakeView extends Croquet.View {
   }
 
   celebrate({ modelId }) {
-    if (!isSelf(modelId, this.model.id)) return;
+    if (!isSelf(modelId, this.model.id) || !this.isSelf) return;
 
     this.publish("toast", "display", {
       viewId: this.viewId,
@@ -226,8 +220,8 @@ export class SnakeView extends Croquet.View {
     });
   }
 
-  grumble({ modelId }) {
-    if (!isSelf(modelId, this.model.id)) return;
+  grumble() {
+    if (!this.isSelf) return;
 
     this.publish("toast", "display", {
       viewId: this.viewId,
@@ -235,9 +229,7 @@ export class SnakeView extends Croquet.View {
     });
   }
 
-  appendTail({ modelId, position }) {
-    if (modelId !== this.model.id) return;
-
+  appendTail({ position }) {
     this.tail.push(
       new SnakeTailFragmentView(this.model, position, this.model.size)
     );
@@ -264,20 +256,20 @@ class SnakeTailFragmentView extends Croquet.View {
     this.position = position;
     this.size = size;
 
+    this.scene = document.querySelector("a-scene");
+
     this.create(position, size);
   }
 
   create(position, size) {
-    const scene = document.querySelector("a-scene");
-
-    const tail = createBox({
+    const fragment = createBox({
       position,
       size,
       color: this.model.color,
     });
 
-    scene.appendChild(tail);
-    this.fragment = tail;
+    this.scene.appendChild(fragment);
+    this.fragment = fragment;
   }
 
   updatePosition(position) {

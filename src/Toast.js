@@ -29,7 +29,7 @@ export class ToastView extends Croquet.View {
 
     setTimeout(() => {
       this.close(toast);
-    }, 2000);
+    }, 1500);
   }
 
   duplicates(message) {

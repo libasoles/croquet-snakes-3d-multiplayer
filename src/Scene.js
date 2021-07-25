@@ -1,7 +1,7 @@
 import Apple, { AppleView } from "./Apple";
 import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
-import { isSelf, randomFrom } from "./utils";
+import { isSelf } from "./utils";
 
 const Q = Croquet.Constants;
 Q.sceneBoundaries = {
@@ -40,7 +40,7 @@ Q.messages = {
     "Oh, do I like this",
     "❤️ I love apples ❤️",
   ],
-  collision: "Ouch!",
+  collision: "* Ouch!",
 };
 
 export default class Scene extends Croquet.Model {
@@ -53,8 +53,8 @@ export default class Scene extends Croquet.Model {
     this.subscribe(this.sessionId, "view-join", this.addUser);
     this.subscribe(this.sessionId, "view-exit", this.deleteUser);
 
-    this.subscribe(this.id, "start", this.start);
-    this.subscribe(this.id, "stop", this.stop);
+    this.subscribe(this.id, "game-start", this.start);
+    this.subscribe(this.id, "game-stop", this.stop);
 
     this.subscribe("apple", "eaten", this.appleEaten);
   }
@@ -140,7 +140,7 @@ export class SceneView extends Croquet.View {
       message: Q.messages.go,
     });
 
-    this.publish(this.model.id, "start");
+    this.publish(this.model.id, "game-start");
   }
 
   appleAdded() {
@@ -174,6 +174,6 @@ export class SceneView extends Croquet.View {
 
     if (this.apple) this.apple.detach();
 
-    this.publish(this.model.id, "stop");
+    this.publish(this.model.id, "game-stop");
   }
 }
