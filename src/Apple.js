@@ -1,4 +1,5 @@
 import { Position } from "./Position";
+import { createBox } from "./utils";
 
 const Q = Croquet.Constants;
 
@@ -6,6 +7,8 @@ export default class Apple extends Croquet.Model {
   init() {
     this.size = Q.unit;
     this.position = this.initialPosition();
+
+    this.color = "red";
 
     this.publish("apple", "created", {
       position: this.position,
@@ -16,7 +19,7 @@ export default class Apple extends Croquet.Model {
     return this.now() <= 1
       ? new Position({
           x: 0,
-          y: 1,
+          y: this.size,
           z: 10,
         })
       : this.randomStartPosition();
@@ -30,7 +33,7 @@ export default class Apple extends Croquet.Model {
       Math.floor(Math.random() * Q.sceneBoundaries.BACKWARD) +
       Q.sceneBoundaries.FORWARD;
 
-    return new Position({ x, y: 1, z });
+    return new Position({ x, y: this.size, z });
   }
 }
 
@@ -49,16 +52,14 @@ export class AppleView extends Croquet.View {
   create() {
     const { size, position } = this.model;
 
-    this.apple = document.createElement("a-box");
-    this.apple.setAttribute("color", "red");
-    this.apple.setAttribute("position", position);
-    this.apple.setAttribute("scale", {
-      x: size,
-      y: size,
-      z: size,
+    const apple = createBox({
+      position,
+      size,
+      color: this.model.color,
     });
 
-    this.scene.appendChild(this.apple);
+    this.scene.appendChild(apple);
+    this.apple = apple;
   }
 
   detach() {

@@ -1,4 +1,5 @@
 import { Position } from "./Position";
+import { createBox } from "./utils";
 
 const Q = Croquet.Constants;
 Q.speed = 0.25;
@@ -8,6 +9,7 @@ export default class Snake extends Croquet.Model {
   init({ scene }) {
     this.scene = scene;
 
+    this.size = Q.unit;
     this.position = this.randomStartPosition();
     this.cameraPosition = new Position({
       ...this.position,
@@ -16,7 +18,10 @@ export default class Snake extends Croquet.Model {
     });
 
     this.direction = new Position();
-    this.size = Q.unit;
+
+    this.color = "orange";
+
+    this.tail = [];
 
     this.onTick();
 
@@ -28,7 +33,7 @@ export default class Snake extends Croquet.Model {
       Math.floor(Math.random() * (Q.sceneBoundaries.RIGHT / 3)) +
       Q.sceneBoundaries.LEFT / 3;
 
-    const position = { x: posibleX, y: 1, z: 25 };
+    const position = { x: posibleX, y: this.size, z: 25 };
 
     const wouldCollide = this.scene.collides(this.stunt(position));
     if (wouldCollide) return this.randomStartPosition();
@@ -58,30 +63,42 @@ export default class Snake extends Croquet.Model {
 
   onTick() {
     if (!Position.isZero(this.direction)) {
+      const currentPosition = this.position;
       this.move(this.direction);
 
       if (this.eats(this.scene.apple)) {
         this.publish("apple", "eaten", { appleId: this.scene.apple.id });
+
+        this.tail.push(currentPosition);
+        this.publish("snake", "append-tail", {
+          modelId: this.id,
+          position: currentPosition,
+        });
       }
     }
     this.future(1000 / 60).onTick();
   }
 
   move(direction) {
-    const nextPosition = Position.add(this.position, direction);
+    const currentPosition = this.position;
+    const nextPosition = Position.add(currentPosition, direction);
 
     if (!this.scene.encloses(nextPosition)) return;
     if (this.scene.collides(this.stunt(nextPosition))) return;
 
-    this.position = nextPosition;
     this.cameraPosition = Position.add(
       this.cameraPosition,
       Position.multiply(direction, 0.8)
     );
 
+    this.position = nextPosition;
+
+    this.tail.unshift(currentPosition);
+    this.tail.pop();
+
     this.publish("snake", "position-changed", {
       modelId: this.id,
-      position: this.position,
+      position: nextPosition,
       cameraPosition: this.cameraPosition,
     });
   }
@@ -111,38 +128,39 @@ export class SnakeView extends Croquet.View {
     super(model);
     this.model = model;
 
-    const { isSelf = false } = props;
-
     this.scene = document.querySelector("a-scene");
-    this.isSelf = isSelf;
 
-    this.createSnake(isSelf);
+    const { isSelf = false } = props;
+    this.isSelf = isSelf;
+    this.create(isSelf);
+
+    this.tail = [];
 
     this.subscribe("snake", "position-changed", this.updatePosition);
+    this.subscribe("snake", "append-tail", this.appendTail);
   }
 
-  createSnake(withCamera) {
+  create(withCamera) {
     const { size, position, cameraPosition } = this.model;
 
-    this.snake = document.createElement("a-box");
-    this.snake.setAttribute("color", "orange");
-    this.snake.setAttribute("position", position);
-    this.snake.setAttribute("scale", {
-      x: size,
-      y: size,
-      z: size,
+    const snake = createBox({
+      position,
+      size,
+      color: this.model.color,
     });
 
-    this.scene.appendChild(this.snake);
+    this.scene.appendChild(snake);
+    this.snake = snake;
 
     if (withCamera) {
-      this.camera = document.createElement("a-camera");
-      this.camera.setAttribute("position", cameraPosition);
-      this.camera.setAttribute("wasd-controls-enabled", false);
-      this.camera.setAttribute("look-controls-enabled", false);
-      this.camera.setAttribute("active", withCamera);
+      const camera = document.createElement("a-camera");
+      camera.setAttribute("position", cameraPosition);
+      camera.setAttribute("wasd-controls-enabled", false);
+      camera.setAttribute("look-controls-enabled", false);
+      camera.setAttribute("active", withCamera);
 
-      this.scene.appendChild(this.camera);
+      this.scene.appendChild(camera);
+      this.camera = camera;
     }
   }
 
@@ -153,6 +171,18 @@ export class SnakeView extends Croquet.View {
 
     if (this.isSelf)
       this.camera.object3D.position.set(camera.x, camera.y, camera.z);
+
+    this.model.tail.forEach((pos, i) => {
+      this.tail[i].updatePosition(pos);
+    });
+  }
+
+  appendTail({ modelId, position }) {
+    if (modelId !== this.model.id) return;
+
+    this.tail.push(
+      new SnakeTailFragmentView(this.model, position, this.model.size)
+    );
   }
 
   detach() {
@@ -160,6 +190,42 @@ export class SnakeView extends Croquet.View {
 
     this.scene.removeChild(this.snake);
 
+    this.tail.forEach((fragment) => {
+      fragment.detach();
+    });
+
     if (this.isSelf) this.scene.removeChild(this.camera);
+  }
+}
+
+class SnakeTailFragmentView extends Croquet.View {
+  constructor(model, position, size) {
+    super(model);
+    this.model = model;
+
+    this.create(position, size);
+  }
+
+  create(position, size) {
+    const scene = document.querySelector("a-scene");
+
+    const tail = createBox({
+      position,
+      size,
+      color: this.model.color,
+    });
+
+    scene.appendChild(tail);
+    this.fragment = tail;
+  }
+
+  updatePosition(position) {
+    this.fragment.object3D.position.set(position.x, position.y, position.z);
+  }
+
+  detach() {
+    super.detach();
+
+    this.scene.removeChild(this.fragment);
   }
 }
