@@ -45,8 +45,6 @@ export class AppleView extends Croquet.View {
     this.scene = document.querySelector("a-scene");
 
     this.create();
-
-    this.subscribe("apple", "eaten", this.detach);
   }
 
   create() {

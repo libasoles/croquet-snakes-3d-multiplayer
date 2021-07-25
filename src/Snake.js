@@ -2,7 +2,8 @@ import { Position } from "./Position";
 import { createBox } from "./utils";
 
 const Q = Croquet.Constants;
-Q.speed = 0.25;
+Q.tick = 1000 / 30;
+Q.speed = 0.5;
 Q.unit = 0.5;
 
 export default class Snake extends Croquet.Model {
@@ -67,16 +68,10 @@ export default class Snake extends Croquet.Model {
       this.move(this.direction);
 
       if (this.eats(this.scene.apple)) {
-        this.publish("apple", "eaten", { appleId: this.scene.apple.id });
-
-        this.tail.push(currentPosition);
-        this.publish("snake", "append-tail", {
-          modelId: this.id,
-          position: currentPosition,
-        });
+        this.publishAppleEaten(currentPosition);
       }
     }
-    this.future(1000 / 60).onTick();
+    this.future(Q.tick).onTick();
   }
 
   move(direction) {
@@ -119,7 +114,19 @@ export default class Snake extends Croquet.Model {
   }
 
   eats(apple) {
+    if (!apple) return false;
+
     return Position.collides(this.position, apple.position, apple.size);
+  }
+
+  publishAppleEaten(currentPosition) {
+    this.publish("apple", "eaten", { appleId: this.scene.apple.id });
+
+    this.tail.push(currentPosition);
+    this.publish("snake", "append-tail", {
+      modelId: this.id,
+      position: currentPosition,
+    });
   }
 }
 
@@ -173,7 +180,7 @@ export class SnakeView extends Croquet.View {
       this.camera.object3D.position.set(camera.x, camera.y, camera.z);
 
     this.model.tail.forEach((pos, i) => {
-      this.tail[i].updatePosition(pos);
+      if (this.tail[i]) this.tail[i].updatePosition(pos);
     });
   }
 

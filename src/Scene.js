@@ -19,12 +19,18 @@ export default class Scene extends Croquet.Model {
     this.subscribe(this.sessionId, "view-join", this.addUser);
     this.subscribe(this.sessionId, "view-exit", this.deleteUser);
 
-    this.subscribe("apple", "eaten", this.addApple);
+    this.subscribe("apple", "eaten", this.appleEaten);
+  }
+
+  appleEaten() {
+    if (this.apple) this.apple.destroy();
+
+    this.apple = null;
+
+    this.future(100).addApple();
   }
 
   addApple() {
-    if (this.apple) this.apple.destroy();
-
     this.apple = Apple.create();
   }
 
