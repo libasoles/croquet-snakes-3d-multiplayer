@@ -59,6 +59,10 @@ export default class Snake extends Croquet.Model {
   onTick() {
     if (!Position.isZero(this.direction)) {
       this.move(this.direction);
+
+      if (this.eats(this.scene.apple)) {
+        this.publish("apple", "eaten", { appleId: this.scene.apple.id });
+      }
     }
     this.future(1000 / 60).onTick();
   }
@@ -66,7 +70,7 @@ export default class Snake extends Croquet.Model {
   move(direction) {
     const nextPosition = Position.add(this.position, direction);
 
-    if (!this.scene.isWithinBoundaries(nextPosition)) return;
+    if (!this.scene.encloses(nextPosition)) return;
     if (this.scene.collides(this.stunt(nextPosition))) return;
 
     this.position = nextPosition;
@@ -95,6 +99,10 @@ export default class Snake extends Croquet.Model {
     if (this.id === actor.id) return false;
 
     return Position.collides(this.position, actor.position, actor.size);
+  }
+
+  eats(apple) {
+    return Position.collides(this.position, apple.position, apple.size);
   }
 }
 
@@ -148,6 +156,8 @@ export class SnakeView extends Croquet.View {
   }
 
   detach() {
+    super.detach();
+
     this.snake.remove();
 
     if (this.isSelf) this.camera.remove();

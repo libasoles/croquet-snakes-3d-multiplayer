@@ -6,8 +6,8 @@ const Q = Croquet.Constants;
 Q.sceneBoundaries = {
   FORWARD: -22,
   BACKWARD: 28,
-  LEFT: -17,
-  RIGHT: 14,
+  LEFT: -20,
+  RIGHT: 25,
 };
 
 export default class Scene extends Croquet.Model {
@@ -18,9 +18,13 @@ export default class Scene extends Croquet.Model {
 
     this.subscribe(this.sessionId, "view-join", this.addUser);
     this.subscribe(this.sessionId, "view-exit", this.deleteUser);
+
+    this.subscribe("apple", "eaten", this.addApple);
   }
 
   addApple() {
+    if (this.apple) this.apple.destroy();
+
     this.apple = Apple.create();
   }
 
@@ -35,7 +39,7 @@ export default class Scene extends Croquet.Model {
     this.publish("scene", "user-deleted", { viewId, time });
   }
 
-  isWithinBoundaries(position) {
+  encloses(position) {
     return (
       position.x <= Q.sceneBoundaries.RIGHT &&
       position.x >= Q.sceneBoundaries.LEFT &&
@@ -72,6 +76,8 @@ export class SceneView extends Croquet.View {
   }
 
   appleAdded() {
+    if (this.apple) this.apple.detach();
+
     this.apple = new AppleView(this.model.apple);
   }
 
@@ -92,6 +98,8 @@ export class SceneView extends Croquet.View {
   }
 
   detach() {
+    super.detach();
+
     Object.values(this.snakes).forEach((snake) => {
       snake.detach();
     });

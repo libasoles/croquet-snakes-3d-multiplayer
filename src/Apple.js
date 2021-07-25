@@ -5,15 +5,32 @@ const Q = Croquet.Constants;
 export default class Apple extends Croquet.Model {
   init() {
     this.size = Q.unit;
-    this.position = new Position({
-      x: 0,
-      y: 1,
-      z: 10,
-    });
+    this.position = this.initialPosition();
 
     this.publish("apple", "created", {
       position: this.position,
     });
+  }
+
+  initialPosition() {
+    return this.now() <= 1
+      ? new Position({
+          x: 0,
+          y: 1,
+          z: 10,
+        })
+      : this.randomStartPosition();
+  }
+
+  randomStartPosition() {
+    const x =
+      Math.floor(Math.random() * Q.sceneBoundaries.RIGHT) +
+      Q.sceneBoundaries.LEFT;
+    const z =
+      Math.floor(Math.random() * Q.sceneBoundaries.BACKWARD) +
+      Q.sceneBoundaries.FORWARD;
+
+    return new Position({ x, y: 1, z });
   }
 }
 
@@ -45,6 +62,8 @@ export class AppleView extends Croquet.View {
   }
 
   detach() {
-    this.apple.remove();
+    super.detach();
+
+    if (this.apple) this.apple.remove();
   }
 }
