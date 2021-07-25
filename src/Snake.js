@@ -25,8 +25,8 @@ export default class Snake extends Croquet.Model {
 
   randomStartPosition() {
     const posibleX =
-      Math.floor(Math.random() * Q.sceneBoundaries.RIGHT) +
-      Q.sceneBoundaries.LEFT;
+      Math.floor(Math.random() * (Q.sceneBoundaries.RIGHT / 3)) +
+      Q.sceneBoundaries.LEFT / 3;
 
     const position = { x: posibleX, y: 1, z: 25 };
 
