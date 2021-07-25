@@ -1,3 +1,12 @@
+# Snakes 3d
+
+Mutiplayer game.
+
+## Technologies
+
+- Croquet.io
+- A-frame
+
 ## Credits
 
 ### 3D models
