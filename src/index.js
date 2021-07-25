@@ -1,3 +1,4 @@
+import Apple from "./Apple";
 import Scene, { SceneView } from "./Scene";
 import Snake from "./Snake";
 
@@ -25,6 +26,7 @@ class GameView extends Croquet.View {
 Game.register("Game");
 Scene.register("Scene");
 Snake.register("Snake");
+Apple.register("Apple");
 
 Croquet.Session.join({
   appId: "io.croquet.gperez.snakes3D",

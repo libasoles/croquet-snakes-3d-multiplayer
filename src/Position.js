@@ -8,27 +8,7 @@ export class Position {
   }
 
   static clone(position) {
-    return new Position({ x: position.x, z: position.z });
-  }
-
-  static getRandom(maxX, maxZ, options = {}) {
-    const min = 0;
-
-    const position = new Position({
-      x: Math.floor(Math.random() * (maxX - min)) + min,
-      z: Math.floor(Math.random() * (maxZ - min)) + min,
-    });
-
-    const tryAgain =
-      options.except &&
-      position.x === options.except.x &&
-      position.z === options.except.z;
-
-    if (tryAgain) {
-      return Position.getRandom(maxX, maxZ, options);
-    }
-
-    return position;
+    return new Position({ x: position.x, y: position.y, z: position.z });
   }
 
   static isZero(pos) {
@@ -37,9 +17,9 @@ export class Position {
 
   static add(pos1, pos2) {
     return new Position({
-      x: pos1.x + pos2.x,
-      y: pos1.y + pos2.y,
-      z: pos1.z + pos2.z,
+      x: pos1.x + (pos2.x || 0),
+      y: pos1.y + (pos2.y || 0),
+      z: pos1.z + (pos2.z || 0),
     });
   }
 
@@ -49,5 +29,14 @@ export class Position {
       y: pos1.y * delta,
       z: pos1.z * delta,
     });
+  }
+
+  static collides(actor, target, actorRadius) {
+    return (
+      actor.x <= target.x + actorRadius &&
+      actor.x >= target.x - actorRadius &&
+      actor.z <= target.z + actorRadius &&
+      actor.z >= target.z - actorRadius
+    );
   }
 }

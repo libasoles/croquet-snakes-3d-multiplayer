@@ -1,3 +1,4 @@
+import Apple, { AppleView } from "./Apple";
 import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
 
@@ -11,19 +12,26 @@ Q.sceneBoundaries = {
 
 export default class Scene extends Croquet.Model {
   init() {
-    this.userData = {};
+    this.snakes = {};
+
+    this.future(1).addApple();
+
     this.subscribe(this.sessionId, "view-join", this.addUser);
     this.subscribe(this.sessionId, "view-exit", this.deleteUser);
   }
 
+  addApple() {
+    this.apple = Apple.create();
+  }
+
   addUser(viewId) {
-    this.userData[viewId] = Snake.create({ scene: this });
+    this.snakes[viewId] = Snake.create({ scene: this });
     this.publish("scene", "user-added", { viewId });
   }
 
   deleteUser(viewId) {
-    const time = this.now() - this.userData[viewId].start;
-    delete this.userData[viewId];
+    const time = this.now() - this.snakes[viewId].start;
+    delete this.snakes[viewId];
     this.publish("scene", "user-deleted", { viewId, time });
   }
 
@@ -35,6 +43,10 @@ export default class Scene extends Croquet.Model {
       position.z >= Q.sceneBoundaries.FORWARD
     );
   }
+
+  collides(snake) {
+    return Object.values(this.snakes).some((aSnake) => snake.collides(aSnake));
+  }
 }
 
 export class SceneView extends Croquet.View {
@@ -44,21 +56,33 @@ export class SceneView extends Croquet.View {
 
     this.snakes = {};
 
-    for (const viewId of Object.keys(model.userData))
-      this.userAdded({ viewId, modelId: model.userData[viewId].id });
+    this.init();
 
     this.subscribe("scene", "user-added", this.userAdded);
     this.subscribe("scene", "user-deleted", this.userDeleted);
+
+    this.subscribe("apple", "created", this.appleAdded);
+  }
+
+  init() {
+    for (const viewId of Object.keys(this.model.snakes))
+      this.userAdded({ viewId, modelId: this.model.snakes[viewId].id });
+
+    this.appleAdded();
+  }
+
+  appleAdded() {
+    this.apple = new AppleView(this.model.apple);
   }
 
   userAdded({ viewId, modelId }) {
     if (viewId === this.viewId) {
       this.keyboard = new KeyboardView(this.model, { modelId });
-      this.snakes[viewId] = new SnakeView(this.model.userData[viewId], {
+      this.snakes[viewId] = new SnakeView(this.model.snakes[viewId], {
         isSelf: true,
       });
     } else {
-      this.snakes[viewId] = new SnakeView(this.model.userData[viewId]);
+      this.snakes[viewId] = new SnakeView(this.model.snakes[viewId]);
     }
   }
 
@@ -71,5 +95,7 @@ export class SceneView extends Croquet.View {
     Object.values(this.snakes).forEach((snake) => {
       snake.detach();
     });
+
+    if (this.apple) this.apple.detach();
   }
 }

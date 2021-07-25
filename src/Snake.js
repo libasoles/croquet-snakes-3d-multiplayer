@@ -2,22 +2,41 @@ import { Position } from "./Position";
 
 const Q = Croquet.Constants;
 Q.speed = 0.25;
-Q.size = 0.5;
+Q.unit = 0.5;
 
 export default class Snake extends Croquet.Model {
   init({ scene }) {
     this.scene = scene;
-    this.cameraPosition = new Position({ x: 0, y: 6, z: 32 });
-    this.position = new Position({ x: 0, y: 1, z: 25 });
+
+    this.position = this.randomStartPosition();
+    this.cameraPosition = new Position({
+      ...this.position,
+      y: 6,
+      z: 32,
+    });
 
     this.direction = new Position();
+    this.size = Q.unit;
 
     this.onTick();
 
-    this.subscribe("keyboard", "arrow-changed", this.handleDirectionChange);
+    this.subscribe("keyboard", "arrow-changed", this.directionChanged);
   }
 
-  handleDirectionChange(event) {
+  randomStartPosition() {
+    const posibleX =
+      Math.floor(Math.random() * Q.sceneBoundaries.RIGHT) +
+      Q.sceneBoundaries.LEFT;
+
+    const position = { x: posibleX, y: 1, z: 25 };
+
+    const wouldCollide = this.scene.collides(this.stunt(position));
+    if (wouldCollide) return this.randomStartPosition();
+
+    return position;
+  }
+
+  directionChanged(event) {
     const { keys, modelId } = event;
 
     if (this.id !== modelId) return;
@@ -48,6 +67,7 @@ export default class Snake extends Croquet.Model {
     const nextPosition = Position.add(this.position, direction);
 
     if (!this.scene.isWithinBoundaries(nextPosition)) return;
+    if (this.scene.collides(this.stunt(nextPosition))) return;
 
     this.position = nextPosition;
     this.cameraPosition = Position.add(
@@ -55,11 +75,26 @@ export default class Snake extends Croquet.Model {
       Position.multiply(direction, 0.8)
     );
 
-    this.publish("keyboard", "position-changed", {
+    this.publish("snake", "position-changed", {
       modelId: this.id,
       position: this.position,
       cameraPosition: this.cameraPosition,
     });
+  }
+
+  stunt(nextPosition) {
+    return {
+      id: this.id,
+      position: { ...nextPosition },
+      size: this.size,
+      collides: this.collides,
+    };
+  }
+
+  collides(actor) {
+    if (this.id === actor.id) return false;
+
+    return Position.collides(this.position, actor.position, actor.size);
   }
 }
 
@@ -75,20 +110,26 @@ export class SnakeView extends Croquet.View {
 
     this.createSnake(isSelf);
 
-    this.subscribe("keyboard", "position-changed", this.handlePositionChanged);
+    this.subscribe("snake", "position-changed", this.updatePosition);
   }
 
   createSnake(withCamera) {
+    const { size, position, cameraPosition } = this.model;
+
     this.snake = document.createElement("a-box");
     this.snake.setAttribute("color", "orange");
-    this.snake.setAttribute("position", this.model.position);
-    this.snake.setAttribute("scale", { x: Q.size, y: Q.size, z: Q.size });
+    this.snake.setAttribute("position", position);
+    this.snake.setAttribute("scale", {
+      x: size,
+      y: size,
+      z: size,
+    });
 
     this.scene.appendChild(this.snake);
 
     if (withCamera) {
       this.camera = document.createElement("a-camera");
-      this.camera.setAttribute("position", this.model.cameraPosition);
+      this.camera.setAttribute("position", cameraPosition);
       this.camera.setAttribute("wasd-controls-enabled", false);
       this.camera.setAttribute("look-controls-enabled", false);
       this.camera.setAttribute("active", withCamera);
@@ -97,7 +138,7 @@ export class SnakeView extends Croquet.View {
     }
   }
 
-  handlePositionChanged({ modelId, position, cameraPosition: camera }) {
+  updatePosition({ modelId, position, cameraPosition: camera }) {
     if (modelId !== this.model.id) return;
 
     this.snake.object3D.position.set(position.x, position.y, position.z);
