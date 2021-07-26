@@ -39,7 +39,13 @@ export class KeyboardView extends Croquet.View {
   }
 
   onKeyDown({ keyCode }) {
-    if (!this.scene.isActive) return;
+    if (!this.scene.isActive) {
+      if (keyCode === 32) {
+        this.publish(this.scene.id, "spacebar-pressed");
+      }
+
+      return;
+    }
 
     const isControlKey = Q.controlKeys.includes(keyCode);
     if (!isControlKey) return;

@@ -123,6 +123,8 @@ export class SceneView extends Croquet.View {
 
     this.subscribe("apple", "created", this.appleAdded);
 
+    this.subscribe(this.model.id, "spacebar-pressed", this.start);
+
     startButton.onclick = () => this.start();
   }
 
@@ -135,6 +137,7 @@ export class SceneView extends Croquet.View {
 
   start() {
     intro.style.display = "none";
+
     this.publish("toast", "display", {
       viewId: this.viewId,
       message: Q.messages.go,
