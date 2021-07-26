@@ -4,12 +4,16 @@
 
 Mutiplayer game.
 
-Demo: https://elegant-brown-ddcdee.netlify.app/
-
 ## Technologies
 
 - Croquet.io
 - A-frame
+
+## Demo
+
+Live demo: https://elegant-brown-ddcdee.netlify.app/
+
+![Desktop demo](https://github.com/libasoles/croquet-snakes-3d-multiplayer/blob/main/snapshot.png)
 
 ## Credits
 
