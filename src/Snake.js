@@ -1,4 +1,4 @@
-import { Position } from "./Position";
+import * as Position from "./Position";
 import { createBox, isSelf, randomFrom } from "./utils";
 
 const Q = Croquet.Constants;
@@ -12,13 +12,13 @@ export default class Snake extends Croquet.Model {
 
     this.size = Q.unit * 2;
     this.position = this.randomStartPosition();
-    this.cameraPosition = new Position({
+    this.cameraPosition = Position.create({
       ...this.position,
       y: 6,
       z: 32,
     });
 
-    this.direction = new Position();
+    this.direction = Position.create();
 
     this.color = color;
 
@@ -43,7 +43,7 @@ export default class Snake extends Croquet.Model {
   }
 
   directionChanged({ keys }) {
-    const direction = new Position();
+    const direction = Position.create();
 
     if (keys[Q.arrow.UP]) {
       direction.z -= Q.speed;
@@ -182,6 +182,7 @@ export class SnakeView extends Croquet.View {
     const snake = createBox({
       position,
       size,
+      className: "snake",
       color: this.model.color,
     });
 

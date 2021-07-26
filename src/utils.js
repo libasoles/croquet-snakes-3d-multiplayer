@@ -2,7 +2,7 @@ export function isSelf(id, anotherId) {
   return id === anotherId;
 }
 
-export function createBox({ position, color, size }) {
+export function createBox({ position, color, size, ...rest }) {
   const box = document.createElement("a-box");
   box.setAttribute("color", color);
   box.setAttribute("position", position);
@@ -11,6 +11,10 @@ export function createBox({ position, color, size }) {
     y: size,
     z: size,
   });
+
+  for (const [key, value] of Object.entries(rest)) {
+    box[key] = value;
+  }
 
   return box;
 }

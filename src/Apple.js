@@ -1,4 +1,4 @@
-import { Position } from "./Position";
+import * as Position from "./Position";
 import { createBox } from "./utils";
 
 const Q = Croquet.Constants;
@@ -17,7 +17,7 @@ export default class Apple extends Croquet.Model {
 
   initialPosition() {
     return this.now() <= 1
-      ? new Position({
+      ? Position.create({
           x: 0,
           y: this.size / 2,
           z: 10,
@@ -33,7 +33,7 @@ export default class Apple extends Croquet.Model {
       Math.floor(Math.random() * Q.sceneBoundaries.BACKWARD) +
       Q.sceneBoundaries.FORWARD;
 
-    return new Position({ x, y: this.size / 2, z });
+    return Position.create({ x, y: this.size / 2, z });
   }
 }
 
