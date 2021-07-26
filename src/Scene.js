@@ -123,7 +123,7 @@ export class SceneView extends Croquet.View {
 
     this.subscribe("apple", "created", this.appleAdded);
 
-    this.subscribe(this.model.id, "spacebar-pressed", this.start);
+    this.subscribe(this.model.id, "start-pressed", this.start);
 
     startButton.onclick = () => this.start();
   }

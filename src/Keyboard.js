@@ -5,6 +5,7 @@ Q.keyMap = {
   83: "DOWN",
   65: "LEFT",
   87: "UP",
+  32: "SPACE",
 };
 
 Q.controlKeys = Object.keys(Q.keyMap).map((key) => Number(key));
@@ -39,16 +40,14 @@ export class KeyboardView extends Croquet.View {
   }
 
   onKeyDown({ keyCode }) {
+    const isControlKey = Q.controlKeys.includes(keyCode);
+    if (!isControlKey) return;
+
     if (!this.scene.isActive) {
-      if (keyCode === 32) {
-        this.publish(this.scene.id, "spacebar-pressed");
-      }
+      this.publish(this.scene.id, "start-pressed");
 
       return;
     }
-
-    const isControlKey = Q.controlKeys.includes(keyCode);
-    if (!isControlKey) return;
 
     const keyName = Q.keyMap[keyCode];
 
@@ -61,8 +60,6 @@ export class KeyboardView extends Croquet.View {
   }
 
   onKeyUp({ keyCode }) {
-    if (!this.scene.isActive) return;
-
     this.activeKeys[Q.keyMap[keyCode]] = false;
 
     this.publishArrowChanged();
