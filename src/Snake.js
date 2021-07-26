@@ -26,7 +26,7 @@ export default class Snake extends Croquet.Model {
 
     this.onTick();
 
-    this.subscribe(this.id, "arrow-changed", this.directionChanged);
+    this.subscribe(this.id, "control-direction-changed", this.directionChanged);
   }
 
   randomStartPosition() {
@@ -42,16 +42,16 @@ export default class Snake extends Croquet.Model {
     return position;
   }
 
-  directionChanged({ keys }) {
+  directionChanged({ directions }) {
     const direction = Position.create();
 
-    if (keys[Q.arrow.UP]) {
+    if (directions[Q.arrow.UP]) {
       direction.z -= Q.speed;
-    } else if (keys[Q.arrow.DOWN]) {
+    } else if (directions[Q.arrow.DOWN]) {
       direction.z += Q.speed;
-    } else if (keys[Q.arrow.LEFT]) {
+    } else if (directions[Q.arrow.LEFT]) {
       direction.x -= Q.speed;
-    } else if (keys[Q.arrow.RIGHT]) {
+    } else if (directions[Q.arrow.RIGHT]) {
       direction.x += Q.speed;
     }
 

@@ -66,8 +66,8 @@ export class KeyboardView extends Croquet.View {
   }
 
   publishArrowChanged() {
-    this.publish(this.modelId, "arrow-changed", {
-      keys: this.activeKeys,
+    this.publish(this.modelId, "control-direction-changed", {
+      directions: this.activeKeys,
       viewId: this.viewId,
       modelId: this.modelId,
     });

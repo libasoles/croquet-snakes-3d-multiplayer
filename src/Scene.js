@@ -1,4 +1,5 @@
 import Apple, { AppleView } from "./Apple";
+import { GesturesView } from "./Gestures";
 import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
 import { isSelf } from "./utils";
@@ -155,6 +156,8 @@ export class SceneView extends Croquet.View {
   userAdded({ viewId, modelId }) {
     if (isSelf(viewId, this.viewId)) {
       this.keyboard = new KeyboardView(this.model, { modelId });
+      this.mobileGestures = new GesturesView(this.model, { modelId });
+
       this.snakes[viewId] = new SnakeView(this.model.snakes[viewId], {
         isSelf: true,
       });
@@ -178,5 +181,8 @@ export class SceneView extends Croquet.View {
     if (this.apple) this.apple.detach();
 
     this.publish(this.model.id, "game-stop");
+
+    this.keyboard.detach();
+    this.mobileGestures.detach();
   }
 }
