@@ -63,6 +63,6 @@ export class AppleView extends Croquet.View {
   detach() {
     super.detach();
 
-    this.scene.removeChild(this.apple);
+    if (this.apple) this.scene.removeChild(this.apple);
   }
 }
