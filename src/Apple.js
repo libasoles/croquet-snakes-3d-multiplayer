@@ -1,7 +1,6 @@
 import * as Position from "./Position";
 import { createBox } from "./utils";
-
-const Q = Croquet.Constants;
+import Q from "./constants";
 
 export default class Apple extends Croquet.Model {
   init() {
@@ -11,6 +10,7 @@ export default class Apple extends Croquet.Model {
     this.color = "red";
 
     this.publish("apple", "created", {
+      appleId: this.id,
       position: this.position,
     });
   }

@@ -3,54 +3,20 @@ import { GesturesView } from "./Gestures";
 import { KeyboardView } from "./Keyboard";
 import Snake, { SnakeView } from "./Snake";
 import { isSelf } from "./utils";
-
-const Q = Croquet.Constants;
-Q.sceneBoundaries = {
-  FORWARD: -22,
-  BACKWARD: 28,
-  LEFT: -20,
-  RIGHT: 25,
-};
-
-Q.colors = [
-  "#ff9fe5",
-  "#75485e",
-  "#7192be",
-  "#70ee9c",
-  "#d4aa7d",
-  "#ef6f6c",
-  "#edae49",
-  "#087ca7",
-  "#3c5a14",
-  "#5b8c5a",
-  "orange",
-];
-
-Q.messages = {
-  go: "Go!",
-  eat: [
-    "Yum!",
-    "Delicious!",
-    "That was a nice one!",
-    "Lovely bite",
-    "Ñam!",
-    "I'd like some more!",
-    "Tasty!",
-    "Feels goood",
-    "Mhhh, get some more!",
-    "Oh, do I like this",
-    "❤️ I love apples ❤️",
-  ],
-  collision: "* Ouch!",
-};
+import Q from "./constants";
 
 export default class Scene extends Croquet.Model {
   init() {
     this.snakes = {};
+    this.apples = {};
     this.isActive = false;
 
-    this.future(1).addApple();
+    this.subscribeToEvents();
 
+    this.future(1).generateApple();
+  }
+
+  subscribeToEvents() {
     this.subscribe(this.sessionId, "view-join", this.addUser);
     this.subscribe(this.sessionId, "view-exit", this.deleteUser);
 
@@ -58,6 +24,20 @@ export default class Scene extends Croquet.Model {
     this.subscribe(this.id, "game-stop", this.stop);
 
     this.subscribe("apple", "eaten", this.appleEaten);
+  }
+
+  numberOfApples() {
+    return Object.keys(this.apples).length;
+  }
+
+  generateApple() {
+    if (this.numberOfApples() <= 1) this.addApple();
+    this.future(Q.appleDropTime).generateApple();
+  }
+
+  addApple() {
+    const apple = Apple.create();
+    this.apples[apple.id] = apple;
   }
 
   start() {
@@ -68,16 +48,14 @@ export default class Scene extends Croquet.Model {
     this.isActive = false;
   }
 
-  appleEaten() {
-    if (this.apple) this.apple.destroy();
+  appleEaten({ appleId }) {
+    if (!this.apples[appleId]) return;
 
-    this.apple = null;
+    this.apples[appleId].destroy();
 
-    this.future(100).addApple();
-  }
+    delete this.apples[appleId];
 
-  addApple() {
-    this.apple = Apple.create();
+    if (this.numberOfApples() === 0) this.future(100).addApple();
   }
 
   addUser(viewId) {
@@ -108,6 +86,10 @@ export default class Scene extends Croquet.Model {
   collides(snake) {
     return Object.values(this.snakes).some((aSnake) => snake.collides(aSnake));
   }
+
+  findSomeFoodFor(snake) {
+    return Object.values(this.apples).find((anApple) => snake.eats(anApple));
+  }
 }
 
 export class SceneView extends Croquet.View {
@@ -116,24 +98,31 @@ export class SceneView extends Croquet.View {
     this.model = model;
 
     this.snakes = {};
+    this.apples = {};
 
-    this.init();
+    this.hydrate();
 
-    this.subscribe("scene", "user-added", this.userAdded);
-    this.subscribe("scene", "user-deleted", this.userDeleted);
-
-    this.subscribe("apple", "created", this.appleAdded);
-
-    this.subscribe(this.model.id, "start-pressed", this.start);
+    this.subscribeToEvents();
 
     startButton.onclick = () => this.start();
   }
 
-  init() {
+  hydrate() {
     for (const viewId of Object.keys(this.model.snakes))
       this.userAdded({ viewId, modelId: this.model.snakes[viewId].id });
 
-    this.appleAdded();
+    for (const appleId of Object.keys(this.model.apples))
+      this.appleAdded({ appleId });
+  }
+
+  subscribeToEvents() {
+    this.subscribe("scene", "user-added", this.userAdded);
+    this.subscribe("scene", "user-deleted", this.userDeleted);
+
+    this.subscribe("apple", "created", this.appleAdded);
+    this.subscribe("apple", "eaten", this.appleEated);
+
+    this.subscribe(this.model.id, "start-pressed", this.start);
   }
 
   start() {
@@ -145,12 +134,6 @@ export class SceneView extends Croquet.View {
     });
 
     this.publish(this.model.id, "game-start");
-  }
-
-  appleAdded() {
-    if (this.apple) this.apple.detach();
-
-    this.apple = new AppleView(this.model.apple);
   }
 
   userAdded({ viewId, modelId }) {
@@ -167,8 +150,21 @@ export class SceneView extends Croquet.View {
   }
 
   userDeleted({ viewId }) {
-    if (this.snakes[viewId]) this.snakes[viewId].detach();
-    delete this.snakes[viewId];
+    if (this.snakes[viewId]) {
+      this.snakes[viewId].detach();
+      delete this.snakes[viewId];
+    }
+  }
+
+  appleAdded({ appleId }) {
+    this.apples[appleId] = new AppleView(this.model.apples[appleId]);
+  }
+
+  appleEated({ appleId }) {
+    if (this.apples[appleId]) {
+      this.apples[appleId].detach();
+      delete this.apples[appleId];
+    }
   }
 
   detach() {
@@ -178,7 +174,9 @@ export class SceneView extends Croquet.View {
       snake.detach();
     });
 
-    if (this.apple) this.apple.detach();
+    Object.values(this.apples).forEach((apple) => {
+      apple.detach();
+    });
 
     this.publish(this.model.id, "game-stop");
 

@@ -1,4 +1,4 @@
-const Q = Croquet.Constants;
+import Q from "./constants";
 
 Q.keyMap = {
   68: "RIGHT",

@@ -1,10 +1,6 @@
 import * as Position from "./Position";
 import { createBox, isSelf, randomFrom } from "./utils";
-
-const Q = Croquet.Constants;
-Q.tick = 1000 / 30;
-Q.speed = 0.5;
-Q.unit = 0.5;
+import Q from "./constants";
 
 export default class Snake extends Croquet.Model {
   init({ scene, color }) {
@@ -63,8 +59,9 @@ export default class Snake extends Croquet.Model {
       const currentPosition = this.position;
       this.move(this.direction);
 
-      if (this.eats(this.scene.apple)) {
-        this.publishAppleEaten(currentPosition);
+      const apple = this.scene.findSomeFoodFor(this);
+      if (apple) {
+        this.publishAppleEaten(apple, currentPosition);
       }
     }
     this.future(Q.tick).onTick();
@@ -128,20 +125,17 @@ export default class Snake extends Croquet.Model {
   }
 
   eats(apple) {
-    if (!apple) return false;
-
     return Position.collides(this.position, apple.position, apple.size);
   }
 
-  publishAppleEaten(currentPosition) {
+  publishAppleEaten(apple, currentPosition) {
     this.publish("apple", "eaten", {
-      modelId: this.id,
-      appleId: this.scene.apple.id,
+      snakeId: this.id,
+      appleId: apple.id,
     });
 
     this.tail.push(currentPosition);
     this.publish(this.id, "append-tail", {
-      modelId: this.id,
       position: currentPosition,
     });
   }
@@ -212,8 +206,8 @@ export class SnakeView extends Croquet.View {
     });
   }
 
-  celebrate({ modelId }) {
-    if (!isSelf(modelId, this.model.id) || !this.isSelf) return;
+  celebrate({ snakeId }) {
+    if (!isSelf(snakeId, this.model.id) || !this.isSelf) return;
 
     this.publish("toast", "display", {
       viewId: this.viewId,
