@@ -22,3 +22,21 @@ export function createBox({ position, color, size, ...rest }) {
 export function randomFrom(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
+
+export function debugWidget() {
+  const app = Croquet.App;
+
+  app.sessionURL = window.location.href;
+  if (!document.getElementById("widgets")) {
+    const widgetDiv = document.createElement("div");
+    widgetDiv.id = "widgets";
+    document.body.appendChild(widgetDiv);
+
+    const statsDiv = document.createElement("div");
+    statsDiv.id = "stats";
+    widgetDiv.appendChild(statsDiv);
+  }
+
+  app.stats = "stats";
+  app.messages = true;
+}
