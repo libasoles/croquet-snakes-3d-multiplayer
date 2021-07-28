@@ -8,7 +8,7 @@ body {
   z-index: 99999;
 }
 
-.shareTheLink {
+.hud.title {
   display: flex;
   justify-content: center;
   text-align: center;
@@ -16,6 +16,10 @@ body {
   top: 60px;
   font-family: "Pacifico", cursive;
   color: #e0bb94;
+}
+
+.hud.dragToMove {
+  display: none;
 }
 
 #startButton {
@@ -90,11 +94,15 @@ body {
     font-size: 2rem;
   }
 
-  #messages {
-    font-size: 0.7rem;
+  .toast {
+    font-size: 1.2rem;
   }
 
-  .shareTheLink,
+  .hud.dragToMove {
+    display: flex;
+  }
+
+  .hud.shareTheLink,
   .controls {
     display: none;
   }
@@ -109,9 +117,11 @@ body {
   background: white;
   z-index: 99999;
 }
+
 #widgets div {
   margin: 8px;
 }
+
 #widgets #text_stats {
   font-size: 12px;
 }

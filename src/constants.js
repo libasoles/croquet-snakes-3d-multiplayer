@@ -22,7 +22,7 @@ Q.colors = [
 ];
 
 Q.messages = {
-  go: "Go!",
+  go: "Go! Eat the apples",
   eat: [
     "Yum!",
     "Delicious!",
@@ -32,6 +32,8 @@ Q.messages = {
     "I'd like some more!",
     "Tasty!",
     "Feels goood",
+    "Give me more",
+    "Sweet",
     "Mhhh, get some more!",
     "Oh, do I like this",
     "❤️ I love apples ❤️",
