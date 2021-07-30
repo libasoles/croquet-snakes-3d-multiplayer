@@ -26,12 +26,14 @@ export default class Apple extends Croquet.Model {
   }
 
   randomStartPosition() {
-    const x =
-      Math.floor(Math.random() * Q.sceneBoundaries.RIGHT) +
-      Q.sceneBoundaries.LEFT;
-    const z =
-      Math.floor(Math.random() * Q.sceneBoundaries.BACKWARD) +
-      Q.sceneBoundaries.FORWARD;
+    const x = Math.floor(
+      this.random() * Q.sceneBoundaries.RIGHT +
+        this.random() * Q.sceneBoundaries.LEFT
+    );
+    const z = Math.floor(
+      this.random() * Q.sceneBoundaries.BACKWARD +
+        this.random() * Q.sceneBoundaries.FORWARD
+    );
 
     return Position.create({ x, y: this.size / 2, z });
   }
