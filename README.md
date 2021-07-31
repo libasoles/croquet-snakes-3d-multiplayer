@@ -9,11 +9,14 @@ Mutiplayer game.
 - Croquet.io
 - A-frame
 
-## Demo
+## Demos
 
 Live demo: https://elegant-brown-ddcdee.netlify.app/
 
-![Desktop demo](https://github.com/libasoles/croquet-snakes-3d-multiplayer/blob/main/snapshot.png)
+![Desktop demo](https://github.com/libasoles/croquet-snakes-3d-multiplayer/blob/main/snapshot.png)(https://streamable.com/oa4grd)
+_(click for video with 4 players)_
+
+![modile demo](https://github.com/libasoles/croquet-snakes-3d-multiplayer/blob/main/demoMobile.gif)
 
 ## Credits
 
