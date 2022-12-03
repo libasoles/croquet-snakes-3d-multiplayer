@@ -11,7 +11,7 @@ Mutiplayer game.
 
 ## Demos
 
-Live demo: https://elegant-brown-ddcdee.netlify.app/
+Live demo: https://snakes3d.netlify.app/
 
 [![Desktop demo](https://github.com/libasoles/croquet-snakes-3d-multiplayer/blob/main/snapshot.png)](https://streamable.com/oa4grd)
 _(click for video with 4 players)_
