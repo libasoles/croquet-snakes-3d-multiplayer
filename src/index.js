@@ -32,7 +32,7 @@ Apple.register("Apple");
 Toast.register("Toast");
 
 Croquet.Session.join({
-  apiKey: '1d5yaq96ii9K5L7zHGa6lxgaMpbO7Au1oinsteyx5',
+  apiKey: '20sVl5QIL2KZ4b8tdMzbwjE3mqz9uAU1o218B0HF13',
   appId: "io.croquet.gperez.snakes3D",
   name: Croquet.App.autoSession(),
   password: Croquet.App.autoPassword(),
